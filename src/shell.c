@@ -24,6 +24,7 @@ void help_command(int, char **);
 void host_command(int, char **);
 void mmtest_command(int, char **);
 void test_command(int, char **);
+void fib_command(int, char **);
 void _command(int, char **);
 
 #define MKCL(n, d) {.name=#n, .fptr=n ## _command, .desc=d}
@@ -37,8 +38,21 @@ cmdlist cl[]={
 	MKCL(mmtest, "heap memory allocation test"),
 	MKCL(help, "help"),
 	MKCL(test, "test new function"),
+	MKCL(fib, "Fibonacci function"),
 	MKCL(, ""),
 };
+
+int atoi(char *str) {
+	int n = 0;
+
+	for(; *str != '\0'; ++str) {
+		/* Make sure the character is number */
+		if(('0' <= *str) && (*str <= '9'))
+			n = n*10 + (*str - '0');
+	}
+
+	return n;
+}
 
 int parse_command(char *str, char *argv[]){
 	int b_quote=0, b_dbquote=0;
@@ -184,6 +198,29 @@ void test_command(int n, char *argv[]) {
     }
 
     host_action(SYS_CLOSE, handle);
+}
+
+void fib_command(int n, char *argv[]){
+	int level, sum, pre[] = {0,1};
+
+	fio_printf(1, "\r\n");
+	if(n==2) {
+		level = atoi(argv[1]);
+		if(level==1) {
+			sum = 1;
+		}
+		else {
+			for(; level>1; level--) {
+				sum = pre[0] + pre[1];
+				pre[0] = pre[1];
+				pre[1] = sum;
+			}
+		}
+		fio_printf(1, "The Fibonacci %d sum is %d\n\r", level, sum);
+	}
+	else {
+		fio_printf(2, "Fibonacci number does not be assigned correctly.\n\r");
+	}
 }
 
 void _command(int n, char *argv[]){
