@@ -25,6 +25,7 @@ void host_command(int, char **);
 void mmtest_command(int, char **);
 void test_command(int, char **);
 void fib_command(int, char **);
+void new_command(int, char **);
 void _command(int, char **);
 
 #define MKCL(n, d) {.name=#n, .fptr=n ## _command, .desc=d}
@@ -39,6 +40,7 @@ cmdlist cl[]={
 	MKCL(help, "help"),
 	MKCL(test, "test new function"),
 	MKCL(fib, "Fibonacci function"),
+	MKCL(new, "Add new dummy tasks"),
 	MKCL(, ""),
 };
 
@@ -51,6 +53,10 @@ int atoi(char *str) {
 	}
 
 	return n;
+}
+
+void dummy(void *pvParameters) {
+	while(1);
 }
 
 int parse_command(char *str, char *argv[]){
@@ -219,6 +225,28 @@ void fib_command(int n, char *argv[]){
 	}
 	else {
 		fio_printf(2, "Fibonacci number does not be assigned correctly.\n\r");
+	}
+}
+
+void new_command(int n, char *argv[]){
+	int t=1;
+	signed portBASE_TYPE err;
+
+	fio_printf(1, "\r\n");
+	if(n>1) {
+		t = atoi(argv[1]);
+	}
+
+	for(; t>0; --t) {
+		err = xTaskCreate(dummy,
+	            (signed portCHAR *) "dummy",
+	            512, NULL, tskIDLE_PRIORITY + 1, NULL);
+		if(err == pdPASS) {
+			fio_printf(1, "A dummy task is created!\n\r");
+		}
+		else {
+			fio_printf(2, "A dummy task is created failed!\r\n");
+		}
 	}
 }
 
