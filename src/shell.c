@@ -45,10 +45,9 @@ cmdlist cl[]={
 int atoi(char *str) {
 	int n = 0;
 
-	for(; *str != '\0'; ++str) {
-		/* Make sure the character is number */
-		if(('0' <= *str) && (*str <= '9'))
-			n = n*10 + (*str - '0');
+	/* Make sure the character is number */
+	for(; ('0' <= *str) && (*str <= '9'); ++str) {
+		n = n*10 + (*str - '0');
 	}
 
 	return n;
