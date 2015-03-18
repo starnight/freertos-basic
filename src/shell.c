@@ -15,6 +15,11 @@ typedef struct {
 	const char *desc;
 } cmdlist;
 
+typedef struct {
+	int n;
+	char **argv;
+} arglist;
+
 void ls_command(int, char **);
 void man_command(int, char **);
 void cat_command(int, char **);
@@ -55,8 +60,24 @@ int atoi(char *str) {
 	return n;
 }
 
-void dummy(void *pvParameters) {
-	while(1);
+void dispatch(void *pvParameters) {
+	arglist *pArgs = pvParameters;
+	cmdfunc *fptr;
+
+	/* Get the command function pointer */
+	fptr = do_command(pArgs->argv[0]);
+	if(fptr!=NULL) {
+		fptr(pArgs->n, pArgs->argv);
+	}
+	else {
+		fio_printf(2, "\r\n\"%s\" command not found.\r\n", pArgs->argv[0]);
+	}
+
+	/* Free the pre-allocated memory */
+	vPortFree(pArgs);
+	/* Delete self task */
+	vTaskDelete(NULL);
+	fio_printf(1, "\r\n");
 }
 
 int parse_command(char *str, char *argv[]){
@@ -221,31 +242,39 @@ void fib_command(int n, char *argv[]){
 				pre[1] = sum;
 			}
 		}
+#if 1
+		/* Emulate calculating long time */
+		vTaskDelay(500);
+#endif
 		fio_printf(1, "The Fibonacci %d sum is %d\n\r", level, sum);
 	}
 	else {
 		fio_printf(2, "Fibonacci number does not be assigned correctly.\n\r");
 	}
+
+	return;
 }
 
 void new_command(int n, char *argv[]){
-	int t=1;
 	signed portBASE_TYPE err;
+	arglist *pArgs;
 
 	fio_printf(1, "\r\n");
 	if(n>1) {
-		t = atoi(argv[1]);
-	}
+		/* Allocate the memory for arguments going to be passed */
+		pArgs = pvPortMalloc(sizeof(arglist));
+		pArgs->n = n - 1;
+		pArgs->argv = argv + 1;
 
-	for(; t>0; --t) {
-		err = xTaskCreate(dummy,
-	            (signed portCHAR *) "dummy",
-	            512, NULL, tskIDLE_PRIORITY + 1, NULL);
+		err = xTaskCreate(dispatch,
+					(signed portCHAR *) argv[1],
+					512, pArgs, tskIDLE_PRIORITY + 1, NULL);
 		if(err == pdPASS) {
-			fio_printf(1, "A dummy task is created!\n\r");
+			fio_printf(1, "%s task is created!\n\r", pArgs->argv[0]);
 		}
 		else {
-			fio_printf(2, "A dummy task is created failed!\r\n");
+			fio_printf(2, "%s task is created failed!\n\r", pArgs->argv[0]);
+			vPortFree(pArgs);
 		}
 	}
 }
