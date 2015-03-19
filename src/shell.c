@@ -229,7 +229,6 @@ void test_command(int n, char *argv[]) {
 void fib_command(int n, char *argv[]){
 	int level, sum, pre[] = {0,1};
 
-	fio_printf(1, "\r\n");
 	if(n==2) {
 		level = atoi(argv[1]);
 		if(level==1) {
@@ -246,10 +245,10 @@ void fib_command(int n, char *argv[]){
 		/* Emulate calculating long time */
 		vTaskDelay(500);
 #endif
-		fio_printf(1, "The Fibonacci %d sum is %d\n\r", level, sum);
+		fio_printf(1, "\r\nThe Fibonacci %d sum is %d\n\r", level, sum);
 	}
 	else {
-		fio_printf(2, "Fibonacci number does not be assigned correctly.\n\r");
+		fio_printf(2, "\r\nFibonacci number does not be assigned correctly.\n\r");
 	}
 
 	return;
@@ -259,7 +258,6 @@ void new_command(int n, char *argv[]){
 	signed portBASE_TYPE err;
 	arglist *pArgs;
 
-	fio_printf(1, "\r\n");
 	if(n>1) {
 		/* Allocate the memory for arguments going to be passed */
 		pArgs = pvPortMalloc(sizeof(arglist));
@@ -270,10 +268,10 @@ void new_command(int n, char *argv[]){
 					(signed portCHAR *) argv[1],
 					512, pArgs, tskIDLE_PRIORITY + 1, NULL);
 		if(err == pdPASS) {
-			fio_printf(1, "%s task is created!\n\r", pArgs->argv[0]);
+			fio_printf(1, "\r\n%s task is created!\n\r", pArgs->argv[0]);
 		}
 		else {
-			fio_printf(2, "%s task is created failed!\n\r", pArgs->argv[0]);
+			fio_printf(2, "\r\n%s task is created failed!\n\r", pArgs->argv[0]);
 			vPortFree(pArgs);
 		}
 	}
